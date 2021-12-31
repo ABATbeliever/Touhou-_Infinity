@@ -1,0 +1,72 @@
+#include "user32.as"
+GetSystemMenu hwnd, 0
+hSystemMenu = stat
+
+*boot
+onexit *exit
+title "“Œ•û–³ŒÀ‹¶(ƒ[ƒh’†)"
+wait 100
+title "“Œ•û–³ŒÀ‹¶"
+dim id,1024
+dim x,1024
+dim y,1024
+ddim kakudo,1024
+kakudo2=0.0
+speed=3,5
+mmload "se1.wav",1
+my_x=320
+my_y=420
+onexit *exit
+
+*main
+onexit *exit
+redraw 0
+color 255,255,255 : boxf
+repeat 1024
+if id(cnt)>0 {
+color : circle x(cnt)-5,y(cnt)-5,x(cnt)+5,y(cnt)+5
+if id(cnt)=1 : kakudo(cnt)-atan(5, sqrt((x(cnt)-320)*(x(cnt)-320)+(y(cnt)-240)*(y(cnt)-240)) )/2
+x(cnt)+=cos(kakudo(cnt))*speed(id(cnt)-1)
+y(cnt)+=sin(kakudo(cnt))*speed(id(cnt)-1)
+if x(cnt)<0 | 640<x(cnt) | y(cnt)<0 | 480<y(cnt) : id(cnt)=0
+}
+loop
+stick key,15
+if key&1 : my_x-8 : if my_x<0 : my_x=0
+if key&2 : my_y-8 : if my_y<0 : my_y=0
+if key&4 : my_x+8 : if my_x>640 : my_x=640
+if key&8 : my_y+8 : if my_y>480 : my_y=480
+pget my_x,my_y
+if ginfo_r=0 & ginfo_g=0 & ginfo_b=0 : wait 20 : mmplay 1 : wait 100 : goto *boot
+color 255 : circle my_x-5,my_y-5,my_x+5,my_y+5
+if timer=3 {
+timer=0
+repeat 1024
+if id(cnt)=0 {
+if 0<=count & count<=9 {
+id(cnt)=1
+x(cnt)=320.0+cos(M_PI*2*count/10+kakudo2)*12
+y(cnt)=240.0+sin(M_PI*2*count/10+kakudo2)*12
+kakudo(cnt)=M_PI*2*count/10+kakudo2
+}
+if 10<=count & count<=19 {
+id(cnt)=2
+x(cnt)=64.0*(count-10)
+y(cnt)=0.0
+kakudo(cnt)=M_PI/2
+}
+count+
+if count=20 : break
+}
+loop
+kakudo2+=0.05
+count=0
+}
+timer+
+redraw
+await 50
+goto *main
+
+*exit
+EnableMenuItem hSystemMenu, $F060, $0001
+goto *boot
